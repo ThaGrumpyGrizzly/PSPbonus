@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PSP Bonus">
+    <title>PSP Bonus Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>💰 PSP Bonus Calculator</h1>
+            <p>Calculate your annual PSP bonus.</p>
+        </header>
+
+        <!-- Main Warning Banner -->
+        <div class="warning-banner">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-content">
+                <h3>⚠️ IMPORTANT DISCLAIMER ⚠️</h3>
+                <p><strong>This is NOT an official calculation!</strong> The results shown are estimates only and may differ significantly from your actual bonus amount. Always refer to official company documentation for accurate figures.</p>
+            </div>
+        </div>
+
+        <main class="calculator">
+            <div class="input-section">
+                <!-- Input Mode Selection -->
+                <div class="input-group">
+                    <label>Calculation Method</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="inputMode" value="annual" id="annualMode" checked>
+                            <span class="radio-custom"></span>
+                            I know my Fiscal Year Annual Base
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="inputMode" value="monthly" id="monthlyMode">
+                            <span class="radio-custom"></span>
+                            Calculate from Monthly Base
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Annual Base Direct Input -->
+                <div class="input-group" id="annualInputGroup">
+                    <label for="annualBase">Fiscal Year Annual Base (€)</label>
+                    <input type="number" id="annualBase" placeholder="Enter your FY annual base" min="0" step="0.01">
+                    <small class="warning-text">⚠️ Ensure this is your accurate annual base for best results</small>
+                </div>
+
+                <!-- Monthly Base Calculation -->
+                <div class="input-group" id="monthlyInputGroup" style="display: none;">
+                    <label for="monthlyBase">Monthly Base Salary (€)</label>
+                    <input type="number" id="monthlyBase" placeholder="Enter your monthly base" min="0" step="0.01">
+                    
+                    <div class="sub-inputs">
+                        <div class="sub-input-group">
+                            <label for="shiftType">Shift Type</label>
+                            <select id="shiftType">
+                                <option value="">Select your shift</option>
+                                <option value="1.00">Regular Day Shift (100%)</option>
+                                <option value="1.2523">Night Shift (125.23%)</option>
+                                <option value="1.08765">A/B Shift (108.765%)</option>
+                                <option value="1.0712">Fixed Morning (107.47%)</option>
+                                <option value="1.1041">Fixed Late (110%)</option>
+                                <option value="1.12">Weekend Day (112%)</option>
+                                <option value="1.20">Weekend Night (120%)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="sub-input-group">
+                            <label for="functionGrade">Function Grade</label>
+                            <select id="functionGrade">
+                                <option value="">Select your grade</option>
+                                <option value="0.05">Knike (5%)</option>
+                                <option value="0.05">K2 (5%)</option>
+                                <option value="0.05">K3 (5%)</option>
+                                <option value="0.10">K4 (10%)</option>
+                                <option value="0.10">K5 (10%)</option>
+                                <option value="0.15">K6 (15%)</option>
+                                <option value="0.15">K7 (15%)</option>
+                                <option value="0.15">K8 (15%)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="calculated-annual">
+                        <p>Calculated Annual Base: <span id="calculatedAnnual">€0.00</span></p>
+                        <div class="warning-box">
+                            <strong>⚠️ ESTIMATE ONLY ⚠️</strong>
+                            <p>This is an approximation. Actual amount may vary due to days off, LTA, and other variables. To calculate the bonus the best way fill in "I know my Fiscal Year Annual Base" by adding up your monthly bruto pays inclusive off the 13th month and vacation pay out</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade Contract Selection (for annual mode) -->
+                <div class="input-group" id="gradeInputGroup">
+                    <label for="gradeContract">Grade Contract</label>
+                    <select id="gradeContract">
+                        <option value="">Select your grade</option>
+                        <option value="0.05">Knike (5%)</option>
+                        <option value="0.05">K2 (5%)</option>
+                        <option value="0.05">K3 (5%)</option>
+                        <option value="0.10">K4 (10%)</option>
+                        <option value="0.10">K5 (10%)</option>
+                        <option value="0.15">K6 (15%)</option>
+                        <option value="0.15">K7 (15%)</option>
+                        <option value="0.15">K8 (15%)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="bonusRate">Bonus Rate (%)</label>
+                    <input type="number" id="bonusRate" placeholder="Enter bonus percentage" min="0" max="100" step="0.01">
+                    <small class="warning-text">⚠️ Bonus rates may vary by year and company performance</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="esppRate">ESPP Contribution (%)</label>
+                    <input type="number" id="esppRate" placeholder="Enter ESPP percentage (optional)" min="0" max="100" step="0.01" value="0">
+                    <small class="input-help">Percentage of your final bonus amount for Employee Stock Purchase Plan</small>
+                </div>
+
+                <!-- Calculation Warning -->
+                <div class="calculation-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <div class="warning-text">
+                        <strong>DISCLAIMER:</strong> This calculator provides estimates only. Actual bonus amounts may differ due to various factors including but not limited to: company performance, individual performance, policy changes, and calculation methods. Always verify with official sources.
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="calculate-btn">Calculate Bonus</button>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <!-- Results Warning Banner -->
+                <div class="results-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <div class="warning-content">
+                        <h3>⚠️ ESTIMATED RESULTS ONLY ⚠️</h3>
+                        <p><strong>These are NOT official figures!</strong> The amounts shown below are estimates based on the information provided. Your actual bonus may be higher or lower. Always refer to official company documentation for accurate amounts.</p>
+                    </div>
+                </div>
+
+                <h2>📊 Bonus Calculation Results</h2>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Annual Base</h3>
+                        <p class="amount" id="displayAnnualBase">€0.00</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Grade Bonus</h3>
+                        <p class="amount" id="displayGradeBonus">€0.00</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Net Bonus Amount</h3>
+                        <p class="amount" id="displayFinalBonus">€0.00</p>
+                    </div>
+                    
+                    <div class="result-card tax-card">
+                        <h3>Tax Amount (13.07%)</h3>
+                        <p class="amount tax-amount" id="displayTaxAmount">€0.00</p>
+                    </div>
+                    
+                    <div class="result-card espp-card">
+                        <h3>ESPP Deduction</h3>
+                        <p class="amount espp-amount" id="displayEsppDeduction">€0.00</p>
+                    </div>
+                    
+                    <div class="result-card highlight">
+                        <h3>Payed out Bonus (After Tax & ESPP)</h3>
+                        <p class="amount highlight" id="displayNetBonus">€0.00</p>
+                        <small class="result-disclaimer">⚠️ ESTIMATE ONLY - Verify with official sources</small>
+                    </div>
+                </div>
+
+                <div class="calculation-breakdown">
+                    <h3>📝 Calculation Breakdown</h3>
+                    <div class="breakdown-item">
+                        <span>Annual Base:</span>
+                        <span id="breakdownAnnual">€0.00</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Grade Contract %:</span>
+                        <span id="breakdownGrade">0%</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Bonus Rate %:</span>
+                        <span id="breakdownBonus">0%</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Tax Rate:</span>
+                        <span>13.07%</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>ESPP Rate %:</span>
+                        <span id="breakdownEspp">0%</span>
+                    </div>
+                    <div class="breakdown-item total">
+                        <span>Formula:</span>
+                        <span>(Annual Base × Grade% × Bonus%) - Tax - ESPP</span>
+                    </div>
+                </div>
+
+                <!-- Final Warning -->
+                <div class="final-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <div class="warning-content">
+                        <h3>⚠️ FINAL REMINDER ⚠️</h3>
+                        <p><strong>This calculation is for informational purposes only.</strong> The actual bonus amount you receive may be different due to various factors including company policies, individual performance, and other variables. Always consult official company documentation for accurate figures.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Made with ❤️ for accurate bonus calculations</p>
+            <p class="footer-disclaimer">⚠️ This tool provides estimates only. Not affiliated with any official company calculations.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
