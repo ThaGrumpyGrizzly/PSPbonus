@@ -546,16 +546,27 @@ body {
     .warning-banner,
     .results-warning,
     .calculation-warning,
-    .final-warning {
+    .final-warning,
+    .psp-rules-info {
         padding: 15px;
     }
     
-    .warning-content h3 {
+    .warning-content h3,
+    .rules-content h3 {
         font-size: 1rem;
     }
     
-    .warning-content p {
+    .warning-content p,
+    .rule-text {
         font-size: 0.9rem;
+    }
+    
+    .rules-grid {
+        gap: 10px;
+    }
+    
+    .rule-item {
+        padding: 10px;
     }
 }
 
@@ -596,4 +607,64 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-} 
+}
+
+/* PSP Rules Information */
+.psp-rules-info {
+    background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+    border: 3px solid #38b2ac;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    box-shadow: 0 8px 25px rgba(56, 178, 172, 0.2);
+}
+
+.rules-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+.rules-content h3 {
+    color: #2c7a7b;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    border-left: 4px solid #38b2ac;
+}
+
+.rule-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.rule-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #2d3748;
+}
+
+.rule-text strong {
+    color: #2c7a7b;
+    display: block;
+    margin-bottom: 3px;
+}

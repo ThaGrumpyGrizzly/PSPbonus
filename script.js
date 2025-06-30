@@ -135,27 +135,64 @@ function calculateBonus() {
 
 function performCalculation(annualBase, gradeContractRate, bonusRate, esppRate) {
     try {
-        // Step 1: Calculate grade bonus
-        const gradeBonus = annualBase * gradeContractRate;
+        // Step 1: Apply PSP bonus rules
+        let adjustedGradeContractRate = gradeContractRate;
+        let adjustedBonusRate = bonusRate;
         
-        // Step 2: Calculate final bonus
-        const finalBonus = gradeBonus * bonusRate;
+        // Rule 1: If bonus rate is 200% or higher, grade % doubles
+        if (bonusRate >= 2.0) { // 200% = 2.0 in decimal
+            adjustedGradeContractRate = gradeContractRate * 2;
+            console.log('PSP Rule Applied: Grade % doubled due to 200%+ bonus rate');
+            console.log('Original Grade Rate:', gradeContractRate, '→ Adjusted Grade Rate:', adjustedGradeContractRate);
+        }
         
-        // Step 3: Calculate tax amount
+        // Rule 2: If bonus rate is below 25%, no payout
+        if (bonusRate < 0.25) { // 25% = 0.25 in decimal
+            console.log('PSP Rule Applied: No payout due to bonus rate below 25%');
+            
+            // Display results with zero values
+            displayResults({
+                annualBase,
+                gradeBonus: 0,
+                finalBonus: 0,
+                taxAmount: 0,
+                esppDeduction: 0,
+                netBonus: 0,
+                gradeContractRate: adjustedGradeContractRate,
+                bonusRate: adjustedBonusRate,
+                esppRate,
+                noPayout: true,
+                noPayoutReason: 'Bonus rate below 25% - No payout'
+            });
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        
+        // Step 2: Calculate grade bonus with adjusted rate
+        const gradeBonus = annualBase * adjustedGradeContractRate;
+        
+        // Step 3: Calculate final bonus
+        const finalBonus = gradeBonus * adjustedBonusRate;
+        
+        // Step 4: Calculate tax amount
         const taxAmount = finalBonus * TAX_RATE;
         
-        // Step 4: Calculate ESPP deduction
+        // Step 5: Calculate ESPP deduction
         const esppDeduction = finalBonus * esppRate;
         
-        // Step 5: Calculate net bonus
+        // Step 6: Calculate net bonus
         const netBonus = finalBonus - taxAmount - esppDeduction;
         
         // Debug logging
         console.log('=== CALCULATION DEBUG ===');
         console.log('Annual Base:', annualBase);
-        console.log('Grade Contract Rate:', gradeContractRate);
-        console.log('Grade Bonus (Annual Base × Grade%):', gradeBonus);
-        console.log('Bonus Rate:', bonusRate);
+        console.log('Original Grade Contract Rate:', gradeContractRate);
+        console.log('Adjusted Grade Contract Rate:', adjustedGradeContractRate);
+        console.log('Original Bonus Rate:', bonusRate);
+        console.log('Adjusted Bonus Rate:', adjustedBonusRate);
+        console.log('Grade Bonus (Annual Base × Adjusted Grade%):', gradeBonus);
         console.log('Final Bonus:', finalBonus);
         console.log('Tax Amount:', taxAmount);
         console.log('ESPP Rate:', esppRate);
@@ -172,9 +209,12 @@ function performCalculation(annualBase, gradeContractRate, bonusRate, esppRate) 
             taxAmount,
             esppDeduction,
             netBonus,
-            gradeContractRate,
-            bonusRate,
-            esppRate
+            gradeContractRate: adjustedGradeContractRate,
+            bonusRate: adjustedBonusRate,
+            esppRate,
+            originalGradeRate: gradeContractRate,
+            originalBonusRate: bonusRate,
+            gradeDoubled: bonusRate >= 2.0
         });
         
         // Show results section
@@ -213,9 +253,80 @@ function displayResults(results) {
     
     // Update breakdown values
     breakdownAnnual.textContent = formatCurrency(results.annualBase);
-    breakdownGrade.textContent = formatPercentage(results.gradeContractRate);
+    
+    // Show adjusted grade rate with explanation if it was doubled
+    if (results.gradeDoubled) {
+        breakdownGrade.innerHTML = `${formatPercentage(results.gradeContractRate)} <small style="color: #38a169; font-weight: bold;">(Doubled from ${formatPercentage(results.originalGradeRate)})</small>`;
+    } else {
+        breakdownGrade.textContent = formatPercentage(results.gradeContractRate);
+    }
+    
     breakdownBonus.textContent = formatPercentage(results.bonusRate);
     breakdownEspp.textContent = formatPercentage(results.esppRate);
+    
+    // Handle PSP rule messages
+    const resultsWarning = document.querySelector('.results-warning');
+    
+    // Clear any existing PSP rule messages
+    const existingPspMessages = document.querySelectorAll('.psp-rule-message');
+    existingPspMessages.forEach(msg => msg.remove());
+    
+    // Add PSP rule messages if applicable
+    if (results.noPayout) {
+        // No payout message
+        const noPayoutMessage = document.createElement('div');
+        noPayoutMessage.className = 'psp-rule-message no-payout-message';
+        noPayoutMessage.innerHTML = `
+            <div class="warning-icon">🚫</div>
+            <div class="warning-content">
+                <h3>🚫 NO PAYOUT - PSP RULE APPLIED 🚫</h3>
+                <p><strong>${results.noPayoutReason}</strong></p>
+                <p>Your bonus rate of ${formatPercentage(results.originalBonusRate)} is below the 25% threshold required for payout.</p>
+            </div>
+        `;
+        noPayoutMessage.style.cssText = `
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #c53030;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        `;
+        resultsWarning.parentNode.insertBefore(noPayoutMessage, resultsWarning.nextSibling);
+        
+        // Update result cards to show zero with explanation
+        const resultCards = document.querySelectorAll('.result-card');
+        resultCards.forEach(card => {
+            const amountElement = card.querySelector('.amount');
+            if (amountElement && amountElement.textContent === '€0,00') {
+                amountElement.style.color = '#e53e3e';
+                amountElement.style.fontWeight = 'bold';
+            }
+        });
+    } else if (results.gradeDoubled) {
+        // Grade doubled message
+        const gradeDoubledMessage = document.createElement('div');
+        gradeDoubledMessage.className = 'psp-rule-message grade-doubled-message';
+        gradeDoubledMessage.innerHTML = `
+            <div class="warning-icon">🎯</div>
+            <div class="warning-content">
+                <h3>🎯 PSP RULE APPLIED - GRADE % DOUBLED 🎯</h3>
+                <p><strong>Your bonus rate of ${formatPercentage(results.originalBonusRate)} triggered the grade doubling rule!</strong></p>
+                <p>Grade rate increased from ${formatPercentage(results.originalGradeRate)} to ${formatPercentage(results.gradeContractRate)}</p>
+            </div>
+        `;
+        gradeDoubledMessage.style.cssText = `
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #2f855a;
+            box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+        `;
+        resultsWarning.parentNode.insertBefore(gradeDoubledMessage, resultsWarning.nextSibling);
+    }
     
     // Add success animation
     addSuccessAnimation();
@@ -290,6 +401,45 @@ style.textContent = `
         cursor: not-allowed;
         transform: none !important;
         box-shadow: none !important;
+    }
+    
+    .psp-rule-message {
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    .psp-rule-message .warning-icon {
+        font-size: 24px;
+        margin-right: 15px;
+        display: inline-block;
+        vertical-align: top;
+    }
+    
+    .psp-rule-message .warning-content {
+        display: inline-block;
+        vertical-align: top;
+        flex: 1;
+    }
+    
+    .psp-rule-message h3 {
+        margin: 0 0 10px 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+    
+    .psp-rule-message p {
+        margin: 5px 0;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .no-payout-message .amount {
+        color: #e53e3e !important;
+        font-weight: bold !important;
+    }
+    
+    .grade-doubled-message .amount {
+        color: #38a169 !important;
+        font-weight: bold !important;
     }
 `;
 document.head.appendChild(style);
